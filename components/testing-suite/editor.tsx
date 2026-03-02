@@ -1,9 +1,15 @@
 "use client";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import { useEffect } from "react";
-import { whatsappFlowSchema } from "./editor-schema";
+import type { editor } from "monaco-editor";
+import { useEffect, useRef } from "react";
+import { whatsappFlowSchemaV2 } from "./editor-shema.v2";
 
-export const FlowJsonEditor = () => {
+interface FlowEditorProps {
+  ref: React.RefObject<editor.IStandaloneCodeEditor | null>;
+}
+
+export const FlowJsonEditor = (props: FlowEditorProps) => {
+  const { ref: editorRef } = props;
   const monaco = useMonaco();
 
   useEffect(() => {
@@ -15,15 +21,21 @@ export const FlowJsonEditor = () => {
         {
           uri: "internal://whatsapp-flow-schema",
           fileMatch: ["*"],
-          schema: whatsappFlowSchema,
+          schema: whatsappFlowSchemaV2,
         },
       ],
     });
-  });
+  }, [monaco]);
+
+  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+    editorRef.current = editor;
+  };
+
   return (
     <Editor
-      height="90vh"
+      height="90%"
       language="json"
+      onMount={handleEditorDidMount}
       options={{
         minimap: { enabled: false },
         stickyScroll: {
