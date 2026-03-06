@@ -1,7 +1,10 @@
-import { useRef, useState } from "react";
-import { Button } from "../ui/button";
+import { useState } from "react";
 import { PreviewHeader } from "./preview-header";
 import { DrawerShell } from "../rendering-engine/drawer-shell";
+import { RoutingModelControl } from "../rendering-engine/routing-model-control";
+import { parseFlowJSON } from "../rendering-engine/lib/parse-flow";
+import { RenderScreen } from "../rendering-engine/flow-screen";
+import { FlowJSON, FlowScreen } from "../rendering-engine/lib/flow";
 
 interface PreviewProps {
   getEditorContent: () => string | undefined;
@@ -10,52 +13,52 @@ interface PreviewProps {
 export const Preview = (props: PreviewProps) => {
   const { getEditorContent } = props;
   const [container, setContainer] = useState<HTMLElement | null>(null);
+  const [renderState, setRenderState] = useState<FlowJSON | null>(null);
+  const [currentScreen, setCurrentScreen] = useState<FlowScreen | null>(null);
 
+  const handleRenderChain = () => {
+    const result = parseFlowJSON(getEditorContent());
+    if (result.status === "success") {
+      setRenderState(result.data);
+      setCurrentScreen(result.data.screens[0]);
+    }
+    console.log("res", result);
+  };
+
+  //fix preview button toggle
+  //routing model toggle control to switch between screens
+  //when flow is invalid, renderer to display flow is invalid
   //get editor content
-  //pass to rendering engine
-  //pass to display component 
 
+  //pass to rendering engine
+  //pass to display component
   return (
     <div className="flex flex-col space-y-8 w-full">
-      <header className="flex flex-row p-4 items-center justify-between px-2 w-full">
-        <p className="font-semibold text-lg">Preview</p>
-        <div className="flex flex-row justify-between items-center space-x-4">
-          <Button
-            variant="default"
-            size="default"
-            className="bg-[#0a78be] rounded-sm hover:bg-[#085f95] "
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6 stroke-white"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-              />
-            </svg>
-
-            <p className="text-white font-semibold text-[16px]">Run</p>
-          </Button>
-          <p>OS and theme selector</p>
-        </div>
-      </header>
+     <PreviewHeader  render={handleRenderChain}/>
       <div className="flex flex-col justify-center items-center space-y-8 h-[90vh] relative">
-        <p>control that is hidden when no routing model is found</p>
+        <RoutingModelControl />
         <article
           ref={setContainer}
           className="flex  flex-col border-4 border-[#e6e6e6] rounded-lg w-90 h-160 relative overflow-hidden"
         >
-          <div className="bg-white flex flex-1 flex-row items-baseline p-4 rounded-t-lg space-x-6">
-            <div className=" flex flex-row justify-center items-center rounded-full bg-[#1DAA61] h-8 w-8">
-              <p>i</p>
+          <div className="bg-white flex flex-1 flex-row items-center p-4 rounded-t-lg space-x-6">
+            <div className="bg-[#1DAA61] rounded-full flex flex-row justify-center items-center   h-8 w-8">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-5 stroke-white   "
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"
+                />
+              </svg>
             </div>
-            <span className="bg-[#1DAA61] flex flex-row w-1/3 h-1 p-1 rounded-md"></span>
+            <div className="bg-[#1DAA61] flex flex-row w-1/3 h-1 p-1 rounded-md"></div>
           </div>
           <div className="h-full bg-[#EFE9E0] py-3 px-2">
             <div className="flex flex-row justify-between mt-2">
@@ -65,10 +68,19 @@ export const Preview = (props: PreviewProps) => {
               </div>
             </div>
             <div>
-        <DrawerShell portalRef={container}/>
+              <DrawerShell
+                title={currentScreen?.title ?? ""}
+                portalRef={container}
+              >
+                {renderState !== null ? (
+                  <RenderScreen screen={renderState.screens[0]} />
+                ) : (
+                  <></>
+                )}
+              </DrawerShell>
             </div>
           </div>
-          <div className="h-fulln flex-1  bg-[#EFE9E0]">
+          <div className="h-full flex-1 bg-[#EFE9E0]">
             <div className="bg-white p-5 rounded-4xl m-2"></div>
           </div>
         </article>
