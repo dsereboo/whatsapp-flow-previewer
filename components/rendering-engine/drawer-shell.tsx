@@ -1,3 +1,4 @@
+"use client";
 import { PropsWithChildren, useState } from "react";
 import { Button } from "../ui/button";
 import {
@@ -10,13 +11,15 @@ import {
 } from "../ui/drawer";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { EllipsisVertical } from "lucide-react";
+import { ParseResult } from "./lib/parse-flow";
 
 interface Props {
   title: string;
   portalRef: HTMLElement | null;
+  parseResult: ParseResult | null;
 }
 export const DrawerShell = (props: PropsWithChildren<Props>) => {
-  const { portalRef, title, children } = props;
+  const { portalRef, title, children, parseResult } = props;
   //read from top level state
   //show creen title
   // const containerRef = useRef<HTMLElement>(null);
@@ -28,6 +31,7 @@ export const DrawerShell = (props: PropsWithChildren<Props>) => {
         open={drawerToggle}
         onOpenChange={setDrawerToggle}
         dismissible={false}
+        modal={false}
       >
         <DrawerTrigger
           className="w-2/3 mt-4"
@@ -38,56 +42,71 @@ export const DrawerShell = (props: PropsWithChildren<Props>) => {
             <div className="w-2/4 p-1 rounded-4xl bg-[#cbcbcb]"></div>
             <div className="bg-white text-center mt-4">
               <div className="bg-white"></div>
-              <p className="text-sm font-medium text-[#007BFC]">
-                Preview Flow
-              </p>
+              <p className="text-sm font-medium text-[#007BFC]">Preview Flow</p>
             </div>
           </div>
         </DrawerTrigger>
-        <DrawerContent
-          container={portalRef}
-          className="absolute inset-x-0 bottom-0 -top-14 min-h-[95%]"
-        >
-          <DrawerHeader className="border-b p-2">
-            <div className="flex flex-row justify-between items-center">
-              <DrawerClose onClick={() => setDrawerToggle(false)}>
-                <Button variant="default" size="icon" className="bg-white">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18 18 6M6 6l12 12"
-                      className="stroke-black"
-                    />
-                  </svg>
-                </Button>
-              </DrawerClose>
-              <p>{title}</p>
-              <div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <EllipsisVertical />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-40">
-                    <p>Help</p>
-                    <p>Report</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
+        {drawerToggle && (
+          <div className="absolute inset-0 bg-black/50 z-40 pointer-events-none" />
+        )}
+      
+         <DrawerContent
+            container={portalRef}
+            overlay={false}
+            className="absolute inset-x-0 bottom-0 -top-14 min-h-[95%]"
+          >
+              {parseResult != null && parseResult.status === "error" ? (
+          <>
+            <div className="flex flex-col h-screen justify-center items-center bg-white">
+              <p className="text-gray-500 font-semibold">Flow JSON is invalid</p>
             </div>
-          </DrawerHeader>
-          <div className="px-6 overflow-y-auto no-scrollbar">{children}</div>
-          <DrawerFooter></DrawerFooter>
-        </DrawerContent>
+          </>
+        ) : (
+         <>
+           <DrawerHeader className="border-b p-2">
+              <div className="flex flex-row justify-between items-center">
+                <DrawerClose onClick={() => setDrawerToggle(false)}>
+                  <Button variant="ghost" size="icon" className="bg-white">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18 18 6M6 6l12 12"
+                        className="stroke-black"
+                      />
+                    </svg>
+                  </Button>
+                </DrawerClose>
+                <p className="text-semibold text-md text-[#0A0A0A]">{title}</p>
+                <div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <EllipsisVertical />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-40">
+                      <p>Help</p>
+                      <p>Report</p>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </DrawerHeader>
+            <div className="px-6 overflow-y-auto no-scrollbar h-full">
+              {children}
+            </div>
+            <DrawerFooter></DrawerFooter></>
+        )}
+          
+          </DrawerContent>
       </Drawer>
     </div>
   );

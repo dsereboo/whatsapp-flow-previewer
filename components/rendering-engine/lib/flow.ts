@@ -16,6 +16,8 @@ export const Components = {
   DatePicker: "DatePicker",
 } as const;
 
+
+export type TopLevelComponentType = Extract<ComponentType, "Form">
 export type ComponentType = keyof typeof Components;
 
 interface DisplayList {
@@ -23,8 +25,8 @@ interface DisplayList {
   title: string
 }
 
-export interface FlowComponent {
-  type: ComponentType;
+export interface FlowComponent<T extends ComponentType= ComponentType>{
+  type: T;
   name?: string;
   label?: string;
   text?: string;
@@ -35,12 +37,12 @@ export interface FlowComponent {
   "helper-text"?: string;
   "data-source"?: string | Array<DisplayList>;
   "on-click-action"?: { name: string; payload: Record<string, unknown> };
-  children?: Array<FlowComponent>;
+  children?: Array<FlowComponent<Exclude<ComponentType,"Form">>>;
 }
 
 export interface FlowLayout {
   type: "SingleColumnLayout";
-  children: Array<FlowComponent>;
+  children: Array<FlowComponent<TopLevelComponentType>>;
 }
 
 export interface FlowScreen {
@@ -53,6 +55,7 @@ export interface FlowScreen {
 }
 
 export interface FlowJSON {
+  index?:string
   version: string;
   data_api_version: string;
   routing_model: Record<string, Array<string>>;

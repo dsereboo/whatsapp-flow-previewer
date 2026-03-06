@@ -52,13 +52,15 @@ function DrawerContent({
   className,
   children,
   container,
+  overlay,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content> & {
     container?: HTMLElement | null 
+    overlay?: boolean
   }) {
   return (
     <DrawerPortal data-slot="drawer-portal" container={container}>
-      <DrawerOverlay className={container ? "absolute" : "fixed"} />
+      {overlay?(<DrawerOverlay className={container ? "absolute" : "fixed"} />):null}
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
