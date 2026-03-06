@@ -11,9 +11,9 @@ export const TestSuitePage = () => {
 
   const getEditorContent = () => {
     const value = editorRef.current?.getValue();
-    console.log(value);
     return value;
   };
+  
   return (
     <TestingSuiteLayout className="border border-gray-300 rounded-md p-1">
       <div className="flex flex-row  min-h-192">

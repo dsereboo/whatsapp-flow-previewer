@@ -55,6 +55,7 @@ export interface FlowScreen {
 }
 
 export interface FlowJSON {
+  index?:string
   version: string;
   data_api_version: string;
   routing_model: Record<string, Array<string>>;

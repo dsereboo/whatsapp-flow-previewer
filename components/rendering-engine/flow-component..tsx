@@ -1,3 +1,4 @@
+import { Button } from "../ui/button";
 import { Field, FieldDescription } from "../ui/field";
 import { FloatingInput, FloatingLabel } from "../ui/floating-input";
 import { FlowComponent } from "./lib/flow";
@@ -6,13 +7,13 @@ interface Props {
   component: FlowComponent;
 }
 
-interface FooterProps {
-  component: FlowComponent;
-  onClick: () => void;
-}
-export const RenderFooter = (props: FooterProps) => {
-  const { component, onClick } = props;
-  console.log("comp", component);
+export const RenderFooter = (props: Props) => {
+  const { component } = props;
+  return (
+    <Button className="absolute bottom-0 w-full rounded-full py-3 bg-[#1DAA61] hover:bg-[#268553]">
+      {component.label}
+    </Button>
+  );
 };
 export const RenderComponent = (props: Props) => {
   const { component } = props;
@@ -66,10 +67,14 @@ export const RenderComponent = (props: Props) => {
 
     case "Footer":
       return (
-        <button className="w-full bg-[#1DAA61] text-white text-sm font-semibold py-3 rounded-lg mt-auto">
-          {component.label}
-        </button>
+        <RenderFooter component={component} />
+        // <button className="w-full bg-[#1DAA61] text-white text-sm font-semibold py-3 rounded-lg mt-auto">
+        //   {component.label}
+        // </button>
       );
+
+    case "Dropdown":
+      return <p className="text-xs">Dropdown</p>;
 
     case "RadioButtonsGroup":
       return (

@@ -1,11 +1,12 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { PreviewHeader } from "./preview-header";
 import { DrawerShell } from "../rendering-engine/drawer-shell";
 import { RoutingModelControl } from "../rendering-engine/routing-model-control";
-import { parseFlowJSON } from "../rendering-engine/lib/parse-flow";
+import { parseFlowJSON, ParseResult } from "../rendering-engine/lib/parse-flow";
 import { RenderScreen } from "../rendering-engine/flow-screen";
 import { FlowJSON, FlowScreen } from "../rendering-engine/lib/flow";
+import { generateUID } from "@/utils";
 
 interface PreviewProps {
   getEditorContent: () => string | undefined;
@@ -13,31 +14,30 @@ interface PreviewProps {
 
 export const Preview = (props: PreviewProps) => {
   const { getEditorContent } = props;
+  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const [renderState, setRenderState] = useState<FlowJSON | null>(null);
   const [currentScreen, setCurrentScreen] = useState<FlowScreen | null>(null);
 
   const handleRenderChain = () => {
     const result = parseFlowJSON(getEditorContent());
+    setParseResult(result);
     if (result.status === "success") {
       setRenderState(result.data);
-      setCurrentScreen(result.data.screens[0]);
+      setCurrentScreen({ ...result.data.screens[0], id: generateUID() });
     }
-    console.log("res", result);
   };
 
-  //fix preview button toggle
-  //routing model toggle control to switch between screens
   //when flow is invalid, renderer to display flow is invalid
-  //get editor content
-
-  //pass to rendering engine
-  //pass to display component
   return (
     <div className="flex flex-col space-y-8 w-full">
-     <PreviewHeader  render={handleRenderChain}/>
+      <PreviewHeader render={handleRenderChain} />
       <div className="flex flex-col  items-center space-y-8 min-h-100 2xl:h-[90vh] h-screen relative">
-        <RoutingModelControl />
+        <RoutingModelControl
+          setCurrentScreen={setCurrentScreen}
+          currentScreen={currentScreen}
+          renderState={renderState}
+        />
         <article
           ref={setContainer}
           className="flex  flex-col border-4 border-[#e6e6e6] rounded-lg 2xl:w-3/4 w-4/6 h-160 relative overflow-hidden"
@@ -68,13 +68,14 @@ export const Preview = (props: PreviewProps) => {
                 <div className="w-3/4 p-1 rounded-4xl bg-[#8e9299]"></div>
               </div>
             </div>
-            <div>
+            <div className="">
               <DrawerShell
+                parseResult={parseResult}
                 title={currentScreen?.title ?? ""}
                 portalRef={container}
               >
-                {renderState !== null ? (
-                  <RenderScreen screen={renderState.screens[0]} />
+                {renderState !== null && currentScreen !== null ? (
+                  <RenderScreen screen={currentScreen} />
                 ) : (
                   <></>
                 )}

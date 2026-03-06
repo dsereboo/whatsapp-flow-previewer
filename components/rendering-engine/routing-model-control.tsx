@@ -1,4 +1,5 @@
-import { Field, FieldGroup } from "../ui/field";
+import { Dispatch, SetStateAction, useState } from "react";
+import { Field } from "../ui/field";
 import {
   Select,
   SelectContent,
@@ -7,41 +8,56 @@ import {
   SelectItem,
   SelectValue,
 } from "../ui/select";
+import { FlowJSON, FlowScreen } from "./lib/flow";
 
 interface Props {
-   
+  renderState: FlowJSON | null;
+  currentScreen: FlowScreen | null;
+  setCurrentScreen: Dispatch<SetStateAction<FlowScreen | null>>;
 }
 
-export const RoutingModelControl = (props:Props) => {
-    const {} = props
-    //source state from where?
+export const RoutingModelControl = (props: Props) => {
+  const { renderState, currentScreen, setCurrentScreen } = props;
+
+  //derived state
+  const handleSelect = (value: string) => {
+    setValue(value);
+    let newScreen =
+      renderState?.screens.filter((screen) => screen.id === value)[0] ?? null;
+    setCurrentScreen(newScreen);
+  };
+
+  const [value, setValue] = useState("");
+  //source state from where?
+
   return (
     <>
-        <FieldGroup className="w-7/12">
-      <Field >
-      <Select defaultValue="BALANCE_CHECK_ENTER_SCREEN">
-          <SelectTrigger    className="rounded-sm px-3 py-5 border-2">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent
-            position= "popper"
-
-            className="mt-1"
+      {renderState?.screens && renderState?.screens?.length > 1 ? (
+        <Field className="w-7/12">
+          <Select
+            defaultValue={currentScreen?.title}
+            value={value}
+            onValueChange={handleSelect}
           >
-            <SelectGroup>
-                   
-              <SelectItem value="apple">
-          apples
-              </SelectItem>
-              <SelectItem value="BALANCE_CHECK_ENTER_SCREEN">BALANCE_CHECK_ENTER_SCREEN</SelectItem>
-              <SelectItem value="blueberry">Blueberry</SelectItem>
-              <SelectItem value="grapes">Grapes</SelectItem>
-              <SelectItem value="pineapple">Pineapple</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-          </Field>
-    </FieldGroup>
+            <SelectTrigger className="rounded-sm px-3 py-5 border-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" className="mt-1">
+              <SelectGroup>
+                {renderState?.screens.map((screen) => {
+                  return (
+                    <SelectItem className="p-3" value={screen.id}>
+                      {screen.title}
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+      ) : (
+        <></>
+      )}
     </>
   );
 };
