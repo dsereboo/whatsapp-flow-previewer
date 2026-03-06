@@ -5,6 +5,7 @@ import { Preview } from "./previewer";
 import { TestingSuiteLayout } from "./test-layout";
 import type { editor } from "monaco-editor";
 
+
 export const TestSuitePage = () => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
@@ -20,7 +21,7 @@ export const TestSuitePage = () => {
           <header className="p-4 border-b">
             <p className="font-semibold text-lg">Flow JSON</p>
           </header>
-          <FlowJsonEditor />
+          <FlowJsonEditor ref={editorRef} />
         </article>
         <article className="flex flex-1 relative w-full h-full">
           <Preview getEditorContent={getEditorContent} />
