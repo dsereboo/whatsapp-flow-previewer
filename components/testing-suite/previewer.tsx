@@ -1,3 +1,4 @@
+"use client"
 import { useState } from "react";
 import { PreviewHeader } from "./preview-header";
 import { DrawerShell } from "../rendering-engine/drawer-shell";
